@@ -107,7 +107,7 @@ def select_parents_3(population):
     return parent1, parent2
 
 # Funktion zur Auswahl von Eltern für die Kreuzung
-def select_parents(population):
+def roulette_wheel_selection(population):
     fitness_values = [calculate_fitness(path_gen_string) for path_gen_string in population]
     # Invertieren der Fitnesswerte und Verwendung einer exponentiellen Funktion
     weights = [1 / (fitness ** 2) for fitness in fitness_values]
@@ -117,6 +117,36 @@ def select_parents(population):
     return parent1, parent2 
 
 
+# TODO check this if it working
+def tournament_selection(population, tournament_size=3):
+    def select_one_parent():
+        tournament = random.sample(population, tournament_size)
+        fitness_values = [calculate_fitness(path_gen_string) for path_gen_string in tournament]
+        best_index = fitness_values.index(min(fitness_values))  # Assuming lower fitness is better
+        return tournament[best_index]
+    
+    parent1 = select_one_parent()
+    parent2 = select_one_parent()
+    
+    while parent1 == parent2:
+        parent2 = select_one_parent()
+    
+    return parent1, parent2
+
+# TODO check this if it working
+def rank_selection(population):
+    fitness_values = [calculate_fitness(path_gen_string) for path_gen_string in population]
+    sorted_population = [x for _, x in sorted(zip(fitness_values, population))]
+    ranks = list(range(1, len(sorted_population) + 1))
+    
+    total_ranks = sum(ranks)
+    selection_probs = [rank / total_ranks for rank in ranks]
+    
+    parent1, parent2 = random.choices(sorted_population, k=2, weights=selection_probs)
+    while parent1 == parent2:
+        parent1, parent2 = random.choices(sorted_population, k=2, weights=selection_probs)
+    
+    return parent1, parent2
 
 def create_child(parent1_part, parent2):
     child = parent1_part + [num for num in parent2 if num not in parent1_part]
@@ -159,6 +189,8 @@ def genetic_algorithm(pop_size, path_gen_string, generations, mutation_rate):
     best_solution = []
     best_solutions = []
     best_fitness_value = 0
+    
+    # Generate Population
     population = generate_population(pop_size, path_gen_string)
     for i in range(generations):
         population = evolve_population(population, mutation_rate)
