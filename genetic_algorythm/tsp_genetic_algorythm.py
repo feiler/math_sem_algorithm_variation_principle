@@ -159,6 +159,52 @@ def crossover(parent1, parent2):
     child2 = create_child(parent2[:crossover_point], parent1)
     return child1, child2
 
+# crossover TODO check this if it working correct
+def one_point_crossover(parent1, parent2):
+    # Stellen Sie sicher, dass die Eltern dieselbe Länge haben
+    assert len(parent1) == len(parent2)
+    
+    # Wählen Sie einen zufälligen Punkt für die Kreuzung
+    crossover_point = random.randint(1, len(parent1) - 1)
+    
+    # Erzeugen Sie die Nachkommen durch Austausch der Genabschnitte nach dem Kreuzungspunkt
+    child1 = parent1[:crossover_point] + parent2[crossover_point:]
+    child2 = parent2[:crossover_point] + parent1[crossover_point:]
+    
+    return child1, child2
+
+def two_point_crossover(parent1, parent2):
+    # Stellen Sie sicher, dass die Eltern dieselbe Länge haben
+    assert len(parent1) == len(parent2)
+    
+    # Wählen Sie zwei zufällige Punkte für die Kreuzung
+    point1 = random.randint(1, len(parent1) - 2)
+    point2 = random.randint(point1 + 1, len(parent1) - 1)
+    
+    # Erzeugen Sie die Nachkommen durch Austausch der Genabschnitte zwischen den Kreuzungspunkten
+    child1 = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
+    child2 = parent2[:point1] + parent1[point1:point2] + parent2[point2:]
+    
+    return child1, child2
+
+def uniform_crossover(parent1, parent2):
+    # Stellen Sie sicher, dass die Eltern dieselbe Länge haben
+    assert len(parent1) == len(parent2)
+    
+    # Erzeugen Sie die Nachkommen durch zufälliges Austauschen der Gene
+    child1, child2 = [], []
+    
+    for gene1, gene2 in zip(parent1, parent2):
+        if random.random() < 0.5:
+            child1.append(gene1)
+            child2.append(gene2)
+        else:
+            child1.append(gene2)
+            child2.append(gene1)
+    
+    return ''.join(child1), ''.join(child2)
+
+
 # Funktion zur Mutation eines Individuums
 def mutate(path_gen_string, mutation_rate):
     if random.random() < mutation_rate:
