@@ -7,10 +7,14 @@ For the MathSem, we explored the variation principle. I chose a theme related to
 Die Installationsanleitung ist für Windows mit VS-Code und Docker aufgebaut (könnte auch mit Apple funktionieren, einfach ohne WSL). 
 Die Idee hinter der Installation ist, dass auch Personen, welche keine Erfahrungen mit Entwicklungen haben.
 Die Software starten können.
-1. [Install WSL2](#installation-wsl2)
-2. [Install VS-Code](#installation-docker)
-3. [Install VS-Code](#installation-vs-code)
-4. [Öffne das Projekt](#öffne-das-projekt)
+1. [Download Projekt von Github](#projekt-ohne-git-herunterladen)
+2. [Install WSL2](#installation-wsl2)
+3. [Install VS-Code](#installation-docker)
+4. [Install VS-Code](#installation-vs-code)
+5. [Öffne das Projekt](#öffne-das-projekt)
+
+## Projekt Ohne Git herunterladen
+![Download From Git](/images/download_from_git.png)
 
 ## Installation WSL2
 WSL2 bringt Linux auf Windows, dies wird für Docker gebraucht. Die Anleitung kann unter diesem Link gefunden werden https://learn.microsoft.com/en-us/windows/wsl/install.
@@ -42,9 +46,14 @@ Nach Installation gehe auf Extensions und suche nach Dev Container.
 ![Docker Config](/images/vs_code_install_extension.png)
 
 ## Öffne das Projekt
+Öffne den heruntergeladenen Ordner.
+![Open Folder](/images/open_project.png)
 
+Wichtig Docker muss laufen, danach hat es in der unteren Ecke ein blaues Feld.
+![Open Folder](/images/open_project_dev_container.png)
 
-Wichtig Docker muss laufen, danach hat es in der unteren Ecke ein blaues Feld. 
+## Start Scripts
+
 
 Dies sollt
 # TODO
