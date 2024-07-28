@@ -60,12 +60,3 @@ Der Container wird aufgezogen und alles wird installiert in Docker.
 Um ein Script zu starte, öffne eine Datei und klicke auf die Run Funktion in der oberen rechten Ecke.
 ![Run Script](/images/start_script.png)
 
-
-Dies sollt
-# TODO
-- Anleitung VS-Code install
-- Docker insall
-- WSL2 insall
-- Add folder with own Readme
-- Anleitung wie gestartet diese werden
-- Aufbereitung der Skripts
