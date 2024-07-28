@@ -28,96 +28,35 @@ cities = np.array([(0, 16), (6, 56), (59, 77), (67, 35), (5, 13),
 
 num_cities = len(cities)
 
-# build 
 
-# Funktion zur Generierung einer zufälligen Population
 def generate_population(pop_size, path_gen_string):
     return [random.sample(path_gen_string, len(path_gen_string)) for _ in range(pop_size)]
-
 
 def calculate_distance(city1, city2):
     return np.sqrt((city1[0]-city2[0])**2 + (city1[1]-city2[1])**2)
 
-# Function to calculate total distance of a path_gen_string
 def total_distance(path_gen_string):
     return sum(calculate_distance(cities[path_gen_string[i-1]], cities[path_gen_string[i]]) for i in range(len(path_gen_string)))
 
-
-# Funktion zur Berechnung der Fitness eines Individuums
 def calculate_fitness(path_gen_string):
     return total_distance(path_gen_string)
 
-def select_parents_2(population):
-
-    if random.random() > 0.5:
-    # Dein Code hier, der ausgeführt wird, wenn die Bedingung erfüllt ist
-        return TournamentSelection(population)
-    else:
-        # Dein Code hier, der ausgeführt wird, wenn die Bedingung nicht erfüllt ist
-        return BiasedRandomSelection(population)
-
-
-def TournamentSelection(population):
-    # Wähle zwei zufällige Individuen aus der Population
-    candidate1 = population[random.randint(0, num_cities - 1)]
-    candidate2 = population[random.randint(0, num_cities - 1)]
-
-    # Stelle sicher, dass die beiden Individuen unterschiedlich sind
-    while candidate1 == candidate2:
-        candidate2 = population[random.randint(0, num_cities - 1)]
-
-    # Gib das Individuum zurück, das den höheren Fitnesswert hat
-    if calculate_fitness(candidate1) > calculate_fitness(candidate2):
-        return candidate1
-    else:
-        return candidate2
-
-def BiasedRandomSelection(population):
-    # Generiere eine Zufallszahl zwischen 0 und 1
-    selectedValue = random.random()
-
-    # Durchlaufe die kumulativen Werte, bis wir einen Wert finden, der größer als der generierte Wert ist
-    for line in population:
-        value = calculate_fitness(line)
-
-        if value >= selectedValue:
-            # Gib das Individuum zurück, das sich an diesem Index befindet
-            return line
-
-    # Wir haben entweder eine Zahl außerhalb unseres Bereichs generiert oder unsere Werte summieren sich nicht auf 1.
-    # Beides sollte unmöglich sein, daher hoffen wir, dass wir das niemals sehen.
-    raise Exception("Oh nein, was ist hier passiert!!!")
-
-def select_parents_3(population):
-    # Berechne Fitnesswerte
-    fitness_values = [calculate_fitness(path_gen_string) for path_gen_string in population]
-    # Sortiere Population nach Fitnesswerten
-    sorted_population = [x for _, x in sorted(zip(fitness_values, population))]
+def select_parents(population):
+    parent1, parent2 = roulette_wheel_selection(population)
+    #parent1, parent2 = tournament_selection(population)
+    #parent1, parent2 = rank_selection(population)
     
-    # Wähle nur Individuen mit Fitnesswerten über dem Median
-    median_fitness = np.median(fitness_values)
-    top_half = [ind for ind, fitness in zip(sorted_population, fitness_values) if fitness > median_fitness]
-
-    # Wähle zufällig zwei Eltern aus der oberen Hälfte
-    parent1, parent2 = random.choices(top_half, k=2)
-    # Stelle sicher, dass die beiden Eltern unterschiedlich sind
-    while parent1 == parent2:
-        parent1, parent2 = random.choices(top_half, k=2)
-
     return parent1, parent2
-
-# Funktion zur Auswahl von Eltern für die Kreuzung
+    
 def roulette_wheel_selection(population):
     fitness_values = [calculate_fitness(path_gen_string) for path_gen_string in population]
-    # Invertieren der Fitnesswerte und Verwendung einer exponentiellen Funktion
+
     weights = [1 / (fitness ** 2) for fitness in fitness_values]
     parent1, parent2 = random.choices(population, k=2, weights=weights)
     while parent1 == parent2:
             parent1, parent2 = random.choices(population, k=2, weights=weights)
     return parent1, parent2 
 
-
-# TODO check this if it working
 def tournament_selection(population, tournament_size=3):
     def select_one_parent():
         tournament = random.sample(population, tournament_size)
@@ -133,7 +72,6 @@ def tournament_selection(population, tournament_size=3):
     
     return parent1, parent2
 
-# TODO check this if it working
 def rank_selection(population):
     fitness_values = [calculate_fitness(path_gen_string) for path_gen_string in population]
     sorted_population = [x for _, x in sorted(zip(fitness_values, population))]
@@ -152,83 +90,74 @@ def create_child(parent1_part, parent2):
     child = parent1_part + [num for num in parent2 if num not in parent1_part]
     return child
 
-# Funktion zur Kreuzung (Crossover) der Eltern
 def crossover(parent1, parent2):
-    crossover_point = random.randint(1, len(parent1) - 2)
-    child1 = create_child(parent1[:crossover_point], parent2) 
-    child2 = create_child(parent2[:crossover_point], parent1)
+    #child1, child2 = one_point_crossover(parent1, parent2)
+    #child1, child2 = two_point_crossover(parent1, parent2)
+    child1, child2 = uniform_crossover(parent1, parent2)
     return child1, child2
 
-# crossover TODO check this if it working correct
 def one_point_crossover(parent1, parent2):
-    # Stellen Sie sicher, dass die Eltern dieselbe Länge haben
-    assert len(parent1) == len(parent2)
-    
-    # Wählen Sie einen zufälligen Punkt für die Kreuzung
-    crossover_point = random.randint(1, len(parent1) - 1)
-    
-    # Erzeugen Sie die Nachkommen durch Austausch der Genabschnitte nach dem Kreuzungspunkt
-    child1 = parent1[:crossover_point] + parent2[crossover_point:]
-    child2 = parent2[:crossover_point] + parent1[crossover_point:]
-    
+    point = random.randint(1, len(parent1) - 2)
+    child1 = parent1[:point] + [city for city in parent2 if city not in parent1[:point]]
+    child2 = parent2[:point] + [city for city in parent1 if city not in parent2[:point]]
     return child1, child2
 
 def two_point_crossover(parent1, parent2):
-    # Stellen Sie sicher, dass die Eltern dieselbe Länge haben
-    assert len(parent1) == len(parent2)
-    
-    # Wählen Sie zwei zufällige Punkte für die Kreuzung
-    point1 = random.randint(1, len(parent1) - 2)
-    point2 = random.randint(point1 + 1, len(parent1) - 1)
-    
-    # Erzeugen Sie die Nachkommen durch Austausch der Genabschnitte zwischen den Kreuzungspunkten
-    child1 = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
-    child2 = parent2[:point1] + parent1[point1:point2] + parent2[point2:]
-    
+    point1 = random.randint(1, len(parent1) - 3)
+    point2 = random.randint(point1 + 1, len(parent1) - 2)
+    child1 = parent1[:point1] + [city for city in parent2 if city not in parent1[:point1]] + parent1[point2:]
+    child2 = parent2[:point1] + [city for city in parent1 if city not in parent2[:point1]] + parent2[point2:]
     return child1, child2
 
 def uniform_crossover(parent1, parent2):
-    # Stellen Sie sicher, dass die Eltern dieselbe Länge haben
-    assert len(parent1) == len(parent2)
-    
-    # Erzeugen Sie die Nachkommen durch zufälliges Austauschen der Gene
-    child1, child2 = [], []
-    
-    for gene1, gene2 in zip(parent1, parent2):
+    child1 = []
+    child2 = []
+    for i in range(len(parent1)):
         if random.random() < 0.5:
-            child1.append(gene1)
-            child2.append(gene2)
+            child1.append(parent1[i])
+            child2.append(parent2[i])
         else:
-            child1.append(gene2)
-            child2.append(gene1)
-    
-    return ''.join(child1), ''.join(child2)
+            child1.append(parent2[i])
+            child2.append(parent1[i])
+    # Ensure valid TSP solutions (no duplicates, all cities present)
+    child1 = fix_tsp_solution(child1, parent1, parent2)
+    child2 = fix_tsp_solution(child2, parent1, parent2)
+    return child1, child2
 
+def fix_tsp_solution(child, parent1, parent2):
+    """ Ensures the child is a valid TSP solution with no duplicates and all cities present. """
+    cities = list(set(parent1).union(set(parent2)))
+    missing_cities = list(set(cities) - set(child))
+    city_count = {city: 0 for city in cities}
 
-# Funktion zur Mutation eines Individuums
+    for city in child:
+        city_count[city] += 1
+
+    duplicate_indices = [i for i, city in enumerate(child) if city_count[city] > 1]
+
+    for i in duplicate_indices:
+        if missing_cities:
+            city_count[child[i]] -= 1
+            child[i] = missing_cities.pop()
+
+    return child
+
 def mutate(path_gen_string, mutation_rate):
     if random.random() < mutation_rate:
-        # Wähle zwei zufällige Positionen im Chromosom aus
         pos1, pos2 = random.sample(range(len(path_gen_string)), 2)
-        #mutated_path_gen_string = path_gen_string[:mutate_point] + path_gen_string[:mutate_point]
-        # Vertausche die Werte an den ausgewählten Positionen
         path_gen_string[pos1], path_gen_string[pos2] = path_gen_string[pos2], path_gen_string[pos1]
     return path_gen_string
 
-# Funktion zur Evolution der Population für eine Generation
 def evolve_population(population, mutation_rate):
     new_population = []
     while len(new_population) < len(population):
-        parent1, parent2 = select_parents_3(population)
-        #parent1 = select_parents_2(population)
-        #parent2 = select_parents_2(population)
+        parent1, parent2 = select_parents(population)
         child1, child2 = crossover(parent1, parent2)
         child1 = mutate(child1, mutation_rate)
         child2 = mutate(child2, mutation_rate)
         new_population.extend([child1, child2])
     return new_population
 
-# Hauptfunktion des genetischen Algorithmus
 def genetic_algorithm(pop_size, path_gen_string, generations, mutation_rate):
     plt.ion() # Turn on interactive mode
     # Generate List
@@ -281,7 +210,7 @@ def print_impovment_way(best_solutions):
 
 if __name__ == "__main__":
     pop_size = 100
-    generations = 100
+    generations = 10
     mutation_rate = 0.5
 
     # all cities bekommen eine number Gen String
